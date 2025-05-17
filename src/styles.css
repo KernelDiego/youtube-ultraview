@@ -1,0 +1,21 @@
+:root {
+  --ytd-h-kerneldiego: 0 !important;
+}
+
+#full-bleed-container {
+  height: 100vh !important;
+  max-height: calc(100vh - var(--ytd-h-kerneldiego)) !important;
+  min-height: var(--ytd-h-kerneldiego) !important;
+}
+
+#page-manager.ytd-app {
+  margin-top: var(--ytd-h-kerneldiego) !important;
+}
+
+#background.ytd-masthead {
+  display: none !important;
+}
+
+#container.ytd-masthead {
+  display: none !important;
+}

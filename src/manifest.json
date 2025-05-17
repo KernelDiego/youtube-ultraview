@@ -1,0 +1,17 @@
+{
+  "name": "youtube-ultraview",
+  "description": "Extensión para navegador que mejora la experiencia de visualización en YouTube. Por ahora elimina la barra de navegación superior y hace que el reproductor ocupe el 100% de la altura de la pantalla.",
+  "version": "0.1.0",
+  "manifest_version": 3,
+  "author": "KernelDiego",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.youtube.com/*"
+      ],
+      "css": [
+        "styles.css"
+      ]
+    }
+  ]
+}
