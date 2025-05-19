@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          
+      - name: Checkout código si hay un release
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          
+      - name: Setup Bun
+        if: ${{ steps.release.outputs.release_created }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.10
+
+      - name: Instalar dependencias si hay un release
+        if: ${{ steps.release.outputs.release_created }}
+        run: bun install --frozen-lockfile
+        
+      # Este paso crea el archivo zip de la extensión
+      - name: Crear archivo zip de la extensión
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          VERSION=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+          NAME=$(node -p "require('./package.json').name")
+          ZIP_NAME="$NAME-v$VERSION.zip"
+          cd src
+          zip -r "../$ZIP_NAME" .
+          cd ..
+          echo "ZIP_PATH=$ZIP_NAME" >> $GITHUB_ENV
+      
+      # Este paso sube el zip como asset al release ya creado por release-please
+      - name: Subir zip al release
+        if: ${{ steps.release.outputs.release_created }}
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ${{ env.ZIP_PATH }}
+          asset_name: ${{ env.ZIP_PATH }}
+          asset_content_type: application/zip
